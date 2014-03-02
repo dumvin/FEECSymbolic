@@ -43,7 +43,7 @@ class Form:
 			return Zero(self.complex,0)
 		return Hodge(self)
 		
-	def __sub__(self):
+	def __sub__(self,form):
 		"""This method defines the difference between txo forms of the same rank"""
 
 		if self.rank!=form.rank:
@@ -164,7 +164,7 @@ class Sub(OperatorForm):
 	""" this class creates a form which is the sum of two forms, of the same rank"""
 	def __init__(self,formA,formB):
 		"""we define our sum, the sense is not important"""
-		super(Add,self).__init__([formA,formB],formA.rank)
+		super(Sub,self).__init__([formA,formB],formA.rank)
 
 	
 	def __repr__(self):
@@ -180,7 +180,7 @@ class Hodge(OperatorForm):
 	""" this class creates the hodge star of a form"""
 	def __init__(self,form):
 		"""the differentiation operates on a form """
-		super(D,self).__init__([forme],form.complex.dimension-form.rank)
+		super(Hodge,self).__init__([form],form.complex.dimension-form.rank)
 		
 	def __repr__(self):
 		return "({}).hodge()".format(repr(self.forms)) 

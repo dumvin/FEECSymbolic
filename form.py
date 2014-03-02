@@ -4,9 +4,11 @@ from complexe import *
 class Form:
 	"""This class is the parent class where you define a form thanks to
 	a complex and a rank"""
+	
 	def __init__(self, complex, rank):
 		self.rank=rank
 		self.complex=complex
+		
 	def d(self):
 		"""This defines the differentiation of an operator"""
 		if self.rank==self.complex.dimension:
@@ -35,6 +37,20 @@ class Form:
 		"""We define this method so that A+B=B+A"""
 		return self.add(form)
 		
+	def hodge(self):
+		"""This defines the Hodge operation"""
+		if self.rank==self.complex.dimension:
+			return Zero(self.complex,0)
+		return Hodge(self)
+		
+	def __sub__(self):
+		"""This method defines the difference between txo forms of the same rank"""
+
+		if self.rank!=form.rank:
+			return "to be added, the forms must have the same rank"
+		elif self.complex!=form.complex:
+			return "The two forms have to be defined with the same complex"
+		return Sub(self,form)
 	
 		
 class TerminalForm(Form):
@@ -77,7 +93,7 @@ class Zero(TerminalForm):
 
 
 class OperatorForm(Form):
-	"""This class is the parent class of all the operation class, We need a representqtion of the form"""
+	"""This class is the parent class of all the operation class, We need a representation of the form"""
 	def __init__(self,forms,rank):
 		
 		self.forms=forms
@@ -99,7 +115,9 @@ class D(OperatorForm):
 		
 	def __str__(self):
 		return "d{}".format(str(self.forms))
-	
+		
+	def toLatex(self):
+		"""Return the latex representation"""
 	
 class Wedge(OperatorForm):
 	"""this class takes for attributes two forms and return their wedge product"""
@@ -114,6 +132,8 @@ class Wedge(OperatorForm):
 	def __str__(self):
 		
 		return "{}^{} ".format(str(self.forms[0]),str(self.forms[1]))
+	def toLatex(self):
+		"""Return the latex representation"""
 		
 class Add(OperatorForm):
 	""" this class creates a form which is the sum of two forms, of the same rank"""
@@ -129,4 +149,37 @@ class Add(OperatorForm):
 	
 		return "{}+{}".format(str(self.forms[0]),str(self.forms[1])) 
 	
+	def toLatex(self):
+		"""Return the latex representation"""
+
+class Sub(OperatorForm):
+	""" this class creates a form which is the sum of two forms, of the same rank"""
+	def __init__(self,formA,formB):
+		"""we define our sum, the sense is not important"""
+		super(Add,self).__init__([formA,formB],formA.rank)
+
+	
+	def __repr__(self):
+		return "{}.sub({})".format(repr(self.forms[0]),repr(self.forms[1])) 
+	def __str__(self):
+	
+		return "{}-{}".format(str(self.forms[0]),str(self.forms[1])) 
+	
+	def toLatex(self):
+		"""Return the latex representation"""
+
+class Hodge(OperatorForm):
+	""" this class creates the hodge star of a form"""
+	def __init__(self,forme):
+		"""the differentiation operates on a form """
+		super(D,self).__init__([forme],form.complex.dimension-forme.rank)
+		
+	def __repr__(self):
+		return "{}.hodge()".format(repr(self.forms)) 
+		
+	def __str__(self):
+		return "*{}".format(str(self.forms))
+		
+	def toLatex(self):
+		"""Return the latex representation"""
 		

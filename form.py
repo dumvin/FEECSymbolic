@@ -111,10 +111,12 @@ class D(OperatorForm):
 		return Zero(self.complex,self.rank+1)
 		
 	def __repr__(self):
-		return "{}.d()".format(repr(self.forms)) 
+		return "({}).d()".format(repr(self.forms)) 
 		
 	def __str__(self):
-		return "d{}".format(str(self.forms))
+		if isinstance(self.forms[0],TerminalForm):
+			return "d{}".format(str(self.forms))
+		return "d({})".format(str(self.forms))
 		
 	def toLatex(self):
 		"""Return the latex representation"""
@@ -127,11 +129,17 @@ class Wedge(OperatorForm):
 		
 	
 	def __repr__(self):
-		return "{}.wedge({})".format(repr(self.forms[0]),repr(self.forms[1])) 
+		return "({}).wedge({})".format(repr(self.forms[0]),repr(self.forms[1])) 
 		
 	def __str__(self):
-		
-		return "{}^{} ".format(str(self.forms[0]),str(self.forms[1]))
+		if isinstance(self.forms[0],TerminalForm):
+			if isinstance(self.forms[1],TerminalForm):
+				return "{}^{} ".format(str(self.forms[0]),str(self.forms[1]))
+			else :
+				return "{}^({}) ".format(str(self.forms[0]),str(self.forms[1]))
+		if isinstance(self.forms[1],TerminalForm):
+				return "({})^{} ".format(str(self.forms[0]),str(self.forms[1]))
+		return "({})^({}) ".format(str(self.forms[0]),str(self.forms[1]))
 	def toLatex(self):
 		"""Return the latex representation"""
 		
@@ -160,7 +168,7 @@ class Sub(OperatorForm):
 
 	
 	def __repr__(self):
-		return "{}.sub({})".format(repr(self.forms[0]),repr(self.forms[1])) 
+		return "({}).sub({})".format(repr(self.forms[0]),repr(self.forms[1])) 
 	def __str__(self):
 	
 		return "{}-{}".format(str(self.forms[0]),str(self.forms[1])) 
@@ -170,15 +178,17 @@ class Sub(OperatorForm):
 
 class Hodge(OperatorForm):
 	""" this class creates the hodge star of a form"""
-	def __init__(self,forme):
+	def __init__(self,form):
 		"""the differentiation operates on a form """
-		super(D,self).__init__([forme],form.complex.dimension-forme.rank)
+		super(D,self).__init__([forme],form.complex.dimension-form.rank)
 		
 	def __repr__(self):
-		return "{}.hodge()".format(repr(self.forms)) 
+		return "({}).hodge()".format(repr(self.forms)) 
 		
 	def __str__(self):
-		return "*{}".format(str(self.forms))
+		if isinstance(self.forms[0],TerminalForm):
+			return "*{}".format(str(self.forms[0]))
+		return "*({})".format(str(self.forms[0]))
 		
 	def toLatex(self):
 		"""Return the latex representation"""

@@ -54,11 +54,11 @@ class TerminalForm(Form):
 			self.name=name
 		
 	def __repr__(self):
-		return "{}".format(self.name)
+		return self.name
 	
 	def __str__(self):
 		
-		return "{}".format(self.name)
+		return self.name
 		
 	def toLatex(self):
 		"""Return the latex representation"""
@@ -78,7 +78,7 @@ class Zero(TerminalForm):
 
 class OperatorForm(Form):
 	"""This class is the parent class of all the operation class, We need a representqtion of the form"""
-	def __init__(self,rank,*forms):
+	def __init__(self,forms,rank):
 		
 		self.forms=forms
 		self.rank=rank
@@ -89,13 +89,13 @@ class D(OperatorForm):
 	""" This class is the differentiation operator"""
 	def __init__(self,forme):
 		"""the differentiation operates on a form """
-		super(D,self).__init__(self,forme.rank,forme)
+		super(D,self).__init__([forme],forme.rank)
 	def d(self):
 		""" the differentiation of a differentiate form is 0"""
 		return Zero(self.complex,self.rank+1)
 		
 	def __repr__(self):
-		return "{}.d()".format(self.forms.__repr__()) 
+		return "{}.d()".format(repr(self.forms)) 
 		
 	def __str__(self):
 		return "d{}".format(str(self.forms))
@@ -105,7 +105,7 @@ class Wedge(OperatorForm):
 	"""this class takes for attributes two forms and return their wedge product"""
 	def __init__(self,formA,formB):
 		"""We define the two attributes of our wedge product, the sense is important"""
-		super(Wedge,self).__init__(self,[formA,formB],rank=formA.rank+formB.rank)
+		super(Wedge,self).__init__([formA,formB],formA.rank+formB.rank)
 		
 	
 	def __repr__(self):
@@ -119,7 +119,7 @@ class Add(OperatorForm):
 	""" this class creates a form which is the sum of two forms, of the same rank"""
 	def __init__(self,formA,formB):
 		"""we define our sum, the sense is not important"""
-		super(Add,self).__init__(self,[formA,formB],rank=formA.rank)
+		super(Add,self).__init__([formA,formB],formA.rank)
 		
 		
 	

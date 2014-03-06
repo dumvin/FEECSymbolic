@@ -1,6 +1,6 @@
 from complexe import *
 
-class Form:
+class Form(object):
 	"""This class is the parent class where you define a form thanks to
 	a complex and a rank"""
 	

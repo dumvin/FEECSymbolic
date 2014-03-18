@@ -1,7 +1,7 @@
 from complex import *
 import copy
 #from decorator import decorator
-#Importer la classe decorator...
+
 
 scalar_precedence=50
    
@@ -25,9 +25,10 @@ class Form(object):
     """This class is the parent class where you define a form thanks to
     a complex and a rank"""
 
-    def __init__(self, complex, rank):
+    def __init__(self, complex, rank,scalar=1):
         self.rank=rank
         self.complex=complex
+        self.scalar=scalar
 
 
     def d(self):
@@ -57,6 +58,12 @@ class Form(object):
     def __radd__(self,form):
         """We define this method so that A+B=B+A"""
         return self.add(form)
+        
+    def __rmul__(self,sca):
+        """We define the scalar multiplication"""
+        formb=copy.copy(self)
+        formb.scalar=sca
+        return formb
 
     def hodge(self):
         """This defines the Hodge operation"""
@@ -100,13 +107,19 @@ class TerminalForm(Form):
             return self.name
         return "{}.{}".format(self.scalar,self.name) 
 
-    def __str__(self,parent_precedence):
+    def __str__(self,parent_precedence=0):
         if self.scalar==1:
             return self.name
         return "{}{}".format(self.scalar,self.name)
-    def to_latex(self,parent_precedence):
+
+    def _to_latex(self,parent_precedence=0):
+        if self.scalar==1:
+            return self.name
+        return "{}{}".format(self.scalar,self.name)        
+    
+    def to_latex(self):
         """Return the latex representation"""
-        return "$ {} $".format(self.name)
+        return "$ {} $".format(self._to_latex())
 
 class Zero(TerminalForm):
     """This define the zero for each form"""
@@ -134,10 +147,7 @@ class D(OperatorForm):
     """ This class is the differentiation operator"""
     def __init__(self,forme):
         """the differentiation operates on a form """
-        scalar=forme.scalar
-        formb=forme
-        formb.scalar=1
-        super(D,self).__init__([formb],forme.rank,scalar)
+        super(D,self).__init__([forme],forme.rank)
 
     precedence=70 #To be defined    
     def d(self):
@@ -152,9 +162,17 @@ class D(OperatorForm):
         if self.scalar==1:
             return "d{}".format(self.forms[0].__str__(self.precedence))
         return "{}d{}".format(self.scalar,self.forms[0].__str__(self.precedence))
-    def to_latex(self):
+    @parenthesize
+    def _to_latex(self,parent_precedence=0):
+        """This function permits to write the the term of latex operator"""
+        
+        if self.scalar==1:
+            return "d{}".format(self.forms[0]._to_latex(self.precedence))
+        return "{}d{}".format(self.scalar,self.forms[0]._to_latex(self.precedence))
+  
+    def to_latex(self):    
         """Return the latex representation"""
-        return "${}$".format(str(self))
+        return "${}$".format(self._to_latex())
 
 
 class Wedge(OperatorForm):
@@ -175,8 +193,15 @@ class Wedge(OperatorForm):
         if     (self.scalar)==1:
             return "{}^{}".format(self.forms[0].__str__(self.precedence),self.forms[1].__str__(self.precedence))
         return "{}({}^{})".format(self.scalar,self.forms[0].__str__(self.precedence),self.forms[1].__str__(self.precedence))
+        
+    @parenthesize
+    def _to_latex(self,parent_precedence=0):
+        """This function permits to write the the term of latex operator"""
+        if     (self.scalar)==1:
+            return "{} \wedge {}".format(self.forms[0]._to_latex(self.precedence),self.forms[1]._to_latex(self.precedence))
+        return "{}({} \wedge {})".format(self.scalar,self.forms[0]._to_latex(self.precedence),self.forms[1]._to_latex(self.precedence))
     def to_latex(self):
-        return "${}$".format(str(self))
+        return "${}$".format(self._to_latex())
 
 class Add(OperatorForm):
     """ this class creates a form which is the sum of two forms, of the same rank"""
@@ -194,9 +219,16 @@ class Add(OperatorForm):
         if self.scalar==1:
             return "{}+{}".format(self.forms[0].__str__(self.precedence),self.forms[1].__str__(self.precedence))  
         return "{}({}+{})".format(self.scalar,self.forms[0].__str__(self.precedence),self.forms[1].__str__(self.precedence))
+    @parenthesize
+    def _to_latex(self,parent_precedence=0):
+        """This function permits to write the the term of latex operator"""
+        if self.scalar==1:
+            return "{}+{}".format(self.forms[0]._to_latex(self.precedence),self.forms[1]._to_latex(self.precedence))  
+        return "{}({}+{})".format(self.scalar,self.forms[0]._to_latex(self.precedence),self.forms[1]._to_latex(self.precedence))
+        
     def to_latex(self):
         """Return the latex representation"""
-        return "${}$".format(str(self))
+        return "${}$".format(self._to_latex())
 
 class Sub(OperatorForm):
     """ this class creates a form which is the sum of two forms, of the same rank"""
@@ -214,6 +246,13 @@ class Sub(OperatorForm):
         if self.scalar==1:
             return "{}-{}".format(self.forms[0].__str__(self.precedence),self.forms[1].__str__(self.precedence))  
         return"{}({}-{})".format(self.scalar,self.forms[0].__str__(self.precedence),self.forms[1].__str__(self.precedence))
+
+    @parenthesize
+    def _to_latex(self,parent_precedence=0):
+        """This function permits to write the the term of latex operator"""
+        if self.scalar==1:
+            return "{}-{}".format(self.forms[0]._to_latex(self.precedence),self.forms[1]._to_latex(self.precedence))  
+        return"{}({}-{})".format(self.scalar,self.forms[0]._to_latex(self.precedence),self.forms[1]._to_latex(self.precedence))
     def to_latex(self):
         """Return the latex representation"""
         return "${}$".format(str(self))
@@ -237,6 +276,13 @@ class Hodge(OperatorForm):
             return "*{}".format(self.forms[0].__str__(self.precedence))
         return "{}*{}".format(self.scalar,self.forms[0].__str__(self.precedence))
 
+
+    @parenthesize    
+    def _to_latex(self,parent_precedence=0):
+        """This function permits to write the the term of latex operator"""
+        if self.scalar==1:
+            return "\ast {}".format(self.forms[0]._to_latex(self.precedence))
+        return "{}\ast {}".format(self.scalar,self.forms[0]._to_latex(self.precedence))
     def to_latex(self):
         """Return the latex representation"""
         return "${}$".format(str(self))

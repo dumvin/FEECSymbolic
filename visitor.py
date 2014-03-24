@@ -1,14 +1,63 @@
+from complex import *
+#We define the different function that needs to be done by our Visitor on the nodes
+def func_term_fo(form):
+    """function that print a terminal Form"""
+    if form.scalar == 1:
+        return form.name
+    return "{}{} ".format(form.scalar,form.name)  
+
+dic_term_fo = {}    
+
+#Opertaor form
+
+def func_op_fo(form):
+    """function when an operator form is found"""
+    #return "Operator form"
+    print("Operator form")
+
+#D form
+
+def diff(form):
+    """function when a diff operation is made"""
+    #return "d "
+    print("d ")
+    
+#Wedge
+
+def wed(form):
+    """function when a wed operation is made"""
+    #return "^ "
+    print("^ ")
+    
+#Add
+    
+def add(form):
+    """function when a wed operation is made"""
+    #return "+ "
+    print("+ ")
+    
+#Hodge
+
+def hod(form):
+    """function when a wed operation is made"""
+    #return "* "
+    print("* ")
+    
+dic_op_fo = {'D': (diff, {}), 'Wedge': (wed, {}), 'Add': (add,{}), 'Hodge': (hod, {}) }
+
 class Visitor(object):
     """this class implement a tree visitor for our form"""
     def __init__():
-        self.handler_dict = {OperatorForm:(HO,DO),TerminalForm:(HT,DT)}
+        self.handler_dict = {OperatorForm:(func_op_fo,dic_op_fo),TerminalForm:(func_term_fo,dic_term_fo)}
 
     def visit(self, form):
         """for the moment we will do a preorder """
         if not isinstance(form,TerminalForm):
+            children=form.forms
             self.find_method(form)
-            self.visit(node.left, visitor)
-            self.visit(node.right, visitor)
+            for fo in children:
+                self.visit(fo)
+            #in post order the find_method will be there
         self.find_method(form)
         
     def find_method(self, form, H=None, D=None):
@@ -16,6 +65,9 @@ class Visitor(object):
         if D is None:
             D = self.handler_dict
         for type, val in D.items():
-            if isinstance(form,type):
-                return self.find_method(self,form,*val) or H
+            m = __import__("form")
+            m = getattr( m, type)
+            #I do not know if there is a nicer way to what i just did
+            if isinstance(form, m):
+                return self.find_method(self, form, *val) or H
             return(H)

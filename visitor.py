@@ -52,17 +52,27 @@ class Visitor(object):
     def __init__(self):
         self.handler_dict = {Form.OperatorForm:(func_op_fo,dic_op_fo),Form.TerminalForm:(func_term_fo,dic_term_fo)}
 
-    def visit(self, form):
-        """for the moment we will do a preorder """
+    def visit_preorder(self, form):
+        """the preorder method for visiting the tree"""
         if not isinstance(form,Form.TerminalForm):
             children=form.forms
             self.find_method(form)(form)
             for fo in children:
-                self.visit(fo)
+                self.visit_preorder(fo)
             #in post order the find_method will be there
         else:
             self.find_method(form)(form)
-        
+    
+    def visit_postorder(self, form):
+        """the postorder method for visiting the tree"""
+        if not isinstance(form,Form.TerminalForm):
+            children=form.forms
+            for fo in children:
+                self.visit_postorder(fo)
+            self.find_method(form)(form)
+        else:
+            self.find_method(form)(form)
+    
     def find_method(self, form, H=None, D=None):
         """This method enables to choose the method that we wamt to apply to a specific node"""
         if D is None:

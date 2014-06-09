@@ -8,6 +8,8 @@ def func_term_fo(form):
     """function that print a terminal Form"""
     if form.scalar == 1:
         return( form.name)
+    elif form.scalar == -1:
+        return( "-{} ".format(form.name)  )
     else:
         return( "{}{} ".format(form.scalar, form.name)  )
 

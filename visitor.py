@@ -4,8 +4,6 @@ from graphviz import Digraph, Graph
 
 #We define the different function that needs to be done by our Visitor on the nodes
 
-
-
 #The most general Visitor class
 class Visitor(object):
     """this class implement a tree visitor for our form"""
@@ -54,6 +52,34 @@ class Visitor(object):
                 
                 return (self.find_method(form, *val)) #or H
         return(H)
+
+#The Visitor class to get all the bottom children in a tree
+class VisitorChildren(Visitor):
+    """The Visitor class to get all the bottom children in a tree"""
+    def __init__(self):
+        self.handler_dict = {Form.OperatorForm:(self.func_op_fo,{}),Form.TerminalForm:(func_term_form,{})}
+        self.list = []
+
+    def func_term_form(self, form):
+        self.list.append(form)
+        return form
+    
+    def func_op_fo(self, form):
+        """function when an operator form is found"""
+        if children:    
+            return form.reconstruct(children)
+        else:
+            return form
+
+    def visit_preorder(self, form):
+        """the preorder method for visiting the tree"""
+        visit = (self._visit_preorder(form))
+        return visit.list
+            
+    def visit_postorder(self, form):
+        """the postorder method for visiting the tree"""
+        visit = (self._visit_postorder(form))
+        return visit.list
 
 #The class that draw a graph of our form, and store pre and post visits in a 
 #table
@@ -191,7 +217,7 @@ class VisitorGraph(Visitor):
             nbr1 = str(self.comp)
             self.comp+=1
             name = nbr1
-            print(name)
+            #~ print(name)
             self.dot.node(name,node)
             if parent_name is not "":
                 inter = parent_name+name                
@@ -231,7 +257,7 @@ class VisitorPullback(Visitor):
         if self.pullback:
             a=(self._visit_preorder(form.forms[0].pullback()))
             b=(self._visit_preorder(form.forms[1].pullback()))
-            return form.scalar*a.wedge(b)
+            return form.scalar * a.wedge(b)
         else:
             return form
 
@@ -241,7 +267,7 @@ class VisitorPullback(Visitor):
         if self.pullback:
             a=(self._visit_preorder(form.forms[0].pullback()))
             b=(self._visit_preorder(form.forms[1].pullback()))
-            return form.scalar*(a+b)
+            return form.scalar * (a+b)
         else:
             return form
             
@@ -257,7 +283,7 @@ class VisitorPullback(Visitor):
         """function when an operator form is found"""    
         if self.pullback:
             self.pullback=False
-            formb = form.scalar*self._visit_preorder(form).pullback()
+            formb = form.scalar * (self._visit_preorder(form).pullback())
             return formb
         else:
             return form
@@ -286,8 +312,6 @@ class VisitorPullback(Visitor):
         formb = self.visit_preorder(form)
         VG = VisitorGraph()
         VG.draw_graph(formb, name)
-
-
 
 class VisitorSimplification(Visitor):
     """ visitor to tansform the pullback of Terminalforms into pullbacked forms
@@ -322,42 +346,42 @@ class VisitorSimplification(Visitor):
         VG = VisitorGraph()
         VG.draw_graph(formb, name)
 
-#The class to push the pullback to the bottom
-class VisitorCleanHodgeStar(Visitor):
-    """ visitor to tansform the form under a hodge star when they are not for """
-    def __init__(self):
-        self.handler_dict = {Form.OperatorForm: (self.func_op_fo ,{Form.Pullback: (self.pull ,{})}), Form.TerminalForm: (self.func_term_fo ,{})}
-            
-    #Operator form
-
-    def func_op_fo (self, form, children=None):
-        """function when an operator form is found"""    
-        return form
-        
-    #TerminalForm
-    def func_term_fo(self, form):
-        """function that print a terminal Form"""
-        return form
-            
-    #Pullback
-    def pull(self, form, children=None):
-        """function when a pullback operation is made"""
-        if isinstance(form.forms[0], Form.Hodge):
-            child = form.forms[0].forms[0]
-            if isinstance(child, Form.TerminalForm):
-                new = form
-            else:    
-                new = form.forms[0].transform()
-            return new
-        else:
-            return form
-        
-    def draw_graph(self , form, name='sample'):
-        """function that draw the graph"""
-        formb = self.visit_preorder(form)
-        VG = VisitorGraph()
-        VG.draw_graph(formb, name)
-        
+#~ #The class to push the pullback to the bottom
+#~ class VisitorCleanHodgeStar(Visitor):
+    #~ """ visitor to tansform the form under a hodge star when they are not for """
+    #~ def __init__(self):
+        #~ self.handler_dict = {Form.OperatorForm: (self.func_op_fo ,{Form.Pullback: (self.pull ,{})}), Form.TerminalForm: (self.func_term_fo ,{})}
+            #~ 
+    #~ #Operator form
+#~ 
+    #~ def func_op_fo (self, form, children=None):
+        #~ """function when an operator form is found"""    
+        #~ return form
+        #~ 
+    #~ #TerminalForm
+    #~ def func_term_fo(self, form):
+        #~ """function that print a terminal Form"""
+        #~ return form
+            #~ 
+    #~ #Pullback
+    #~ def pull(self, form, children=None):
+        #~ """function when a pullback operation is made"""
+        #~ if isinstance(form.forms[0], Form.Hodge):
+            #~ child = form.forms[0].forms[0]
+            #~ if isinstance(child, Form.TerminalForm):
+                #~ new = form
+            #~ else:    
+                #~ new = form.forms[0].transform()
+            #~ return new
+        #~ else:
+            #~ return form
+        #~ 
+    #~ def draw_graph(self , form, name='sample'):
+        #~ """function that draw the graph"""
+        #~ formb = self.visit_preorder(form)
+        #~ VG = VisitorGraph()
+        #~ VG.draw_graph(formb, name)
+        #~ 
 class VisitorExpansion(Visitor):
     """ visitor to replace the terminalForm in their basis decomposition"""
     def __init__(self):
@@ -367,21 +391,16 @@ class VisitorExpansion(Visitor):
 
     def func_op_fo (self, form, children=None):
         """function when an operator form is found"""
-        print "ope form"
-        print form
         return form
         
     #TerminalForm
     def func_term_fo(self, form):
         """function that print a terminal Form"""
-        if not (form.decompose().rank == 0):
-            print "Term form non 0"
-            print form.decompose()
-            return form.decompose() #(self._visit_preorder(form.decompose()))
-        else:
-            print "Term 0"
-            print form
-            return form
+        #~ if not (form.decompose().rank == 0):
+            #~ return form.decompose() #(self._visit_preorder(form.decompose()))
+        #~ else:
+            #~ return form
+        return form.decompose()
         
     def _visit_preorder(self, form):
         """the intern preorder method for visiting the tree"""
@@ -398,6 +417,63 @@ class VisitorExpansion(Visitor):
 class VisitorHodgeDistribution(Visitor):
     """ visitor to distribute the Hodge star on the addition"""
     """and maybe in a futher on the wedge product and the diff one"""
+    def __init__(self):
+        self.handler_dict = {Form.OperatorForm: (self.func_op_fo ,{Form.Hodge : (self.hodge, {}), Form.D : (self.d, {})}), Form.TerminalForm: (self.func_term_fo ,{})}
+        self.decompose = False    
+        
+    #Operator form
+    def func_op_fo (self, form, children=None):
+        """function when an operator form is found"""
+        return form
+        
+    #TerminalForm
+    def func_term_fo(self, form):
+        """function that print a terminal Form"""
+        return form
+    
+    def d(self, form):
+        """ we applied the leibniz rule each time we hit a diff of a wedge form"""
+        return form.leibniz()
+
+    #Hodge Star
+    def hodge(self, form):
+        new = form
+        new.scalar = form.scalar
+        if isinstance(form.forms[0], Form.Add):
+            child = form.forms[0].forms
+            print "child", child
+            new = form.forms[0].scalar * form.scalar * (self._visit_preorder( child[0].hodge()) + self._visit_preorder(child[1].hodge()))
+            print "new",new
+        elif isinstance(form.forms[0], Form.Hodge):
+            k = form.forms[0].forms[0].rank 
+            N = form.complex.dimension 
+            new = form.scalar * form.forms[0].scalar * (-1)** (k*( N-k))*form.forms[0].forms[0]
+            new = self._visit_preorder(new)
+        else:
+            children = map(self._visit_preorder, form.forms)
+            new.reconstruct(children)
+        return new
+
+    def _visit_preorder(self, form):
+        """the intern preorder method for visiting the tree"""
+        print form
+        new_form = self.find_method(form)(form)
+        print "new form", new_form
+        if not isinstance(form, Form.TerminalForm):
+            new_children = map(self._visit_preorder, new_form.forms)
+        else:
+            new_children = form.forms
+        return new_form.reconstruct(new_children)
+        
+    def draw_graph(self, form, name='sample'):
+        """function that draw the graph"""
+        formb = self.visit_preorder(form)
+        VG = VisitorGraph()
+        VG.draw_graph(formb, name)
+
+class VisitorHodgeEvaluation(Visitor):
+    """ visitor to transofrm the hodge star of a basis into basis functions"""
+    """"""
     def __init__(self):
         self.handler_dict = {Form.OperatorForm: (self.func_op_fo ,{Form.Hodge : (self.hodge, {})}), Form.TerminalForm: (self.func_term_fo ,{})}
         self.decompose = False    
